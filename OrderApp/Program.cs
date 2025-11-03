@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using OrderApp.Models;
 using OrderApp.Services;
 using OrderApp.Repositories;
+using OrderApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,8 +24,31 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
 
-// DI registrations
-builder.Services.AddSingleton<IOrderRepository, InMemoryOrderRepository>();
+// Configure storage
+var storageProvider = builder.Configuration.GetValue<string>("Storage:Provider") ?? "InMemory";
+if (storageProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+{
+    var connStr = builder.Configuration.GetValue<string>("Storage:ConnectionStrings:Sqlite")
+        ?? throw new InvalidOperationException("Sqlite connection string not configured");
+        
+    builder.Services.AddDbContext<OrderDbContext>(options =>
+        options.UseSqlite(connStr));
+    
+    // Ensure database exists and is up to date
+    using (var scope = builder.Services.BuildServiceProvider().CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
+        context.Database.EnsureCreated();
+    }
+    
+    builder.Services.AddScoped<IOrderRepository, EfOrderRepository>();
+}
+else
+{
+    // Fall back to in-memory storage
+    builder.Services.AddSingleton<IOrderRepository, InMemoryOrderRepository>();
+}
+
 builder.Services.AddScoped<IOrderService, OrderService>();
 
 // JWT configuration
