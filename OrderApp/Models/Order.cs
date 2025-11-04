@@ -15,4 +15,18 @@ public class Order
     
     [Column("CreatedAt")]
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
+
+    // Shipping status for processing lifecycle
+    public ShippingStatus ShippingStatus { get; set; } = ShippingStatus.Pending;
+    
+    // Timestamp of the last update to the order (status changes etc.)
+    public DateTime LastUpdatedUtc { get; set; } = DateTime.UtcNow;
+}
+
+public enum ShippingStatus
+{
+    Pending,
+    Processing,
+    Shipped,
+    Failed
 }

@@ -34,4 +34,20 @@ public class OrderService : IOrderService
         if (!deleted)
             throw new ArgumentException($"Order with id {id} not found", nameof(id));
     }
+
+    public async Task ProcessOrder(System.Guid id)
+    {
+        // Delegate to repository which updates ShippingStatus
+        await _repo.ProcessOrder(id);
+    }
+
+    // Backwards-compatible wrapper that returns the updated order
+    public async Task<Order> ProcessOrderAsync(System.Guid id)
+    {
+        await ProcessOrder(id);
+        var order = await _repo.GetByIdAsync(id);
+        if (order is null)
+            throw new ArgumentException($"Order with id {id} not found", nameof(id));
+        return order;
+    }
 }

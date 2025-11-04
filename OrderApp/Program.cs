@@ -140,6 +140,20 @@ app.MapDelete("/orders/{id}", async (IOrderService svc, Guid id) =>
     }
 }).RequireAuthorization();
 
+// Process an order (updates ShippingStatus internally and returns the updated order)
+app.MapPost("/orders/{id}/process", async (IOrderService svc, Guid id) =>
+{
+    try
+    {
+        var order = await svc.ProcessOrderAsync(id);
+        return Results.Ok(order);
+    }
+    catch (ArgumentException)
+    {
+        return Results.NotFound();
+    }
+}).RequireAuthorization();
+
 app.Run();
 
 // DTO used by login endpoint

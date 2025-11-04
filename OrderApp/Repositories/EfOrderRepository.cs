@@ -45,4 +45,24 @@ public class EfOrderRepository : IOrderRepository
     {
         return await _context.Orders.OrderByDescending(o => o.CreatedUtc).ToListAsync();
     }
+
+    public async Task ProcessOrder(System.Guid id)
+    {
+        var order = await _context.Orders.FindAsync(id);
+        if (order == null)
+            throw new ArgumentException($"Order with id {id} not found", nameof(id));
+
+    // Mark as processing
+    order.ShippingStatus = ShippingStatus.Processing;
+    order.LastUpdatedUtc = DateTime.UtcNow;
+    await _context.SaveChangesAsync();
+
+    // Simulate some processing work (short delay)
+    await Task.Delay(20);
+
+    // Mark as shipped
+    order.ShippingStatus = ShippingStatus.Shipped;
+    order.LastUpdatedUtc = DateTime.UtcNow;
+    await _context.SaveChangesAsync();
+    }
 }
