@@ -37,13 +37,13 @@ OrderApp.Tests/        # Test project
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/estebano/orders_p.git
+cd orders_p
 ```
 
 2. Build the solution:
 ```bash
-dotnet build
+dotnet build OrderApp/OrderApp.csproj
 ```
 
 3. Run the application:
