@@ -72,7 +72,7 @@ Storage backend can be configured in `appsettings.json`:
 
 Run all tests:
 ```bash
-dotnet test
+dotnet test OrderApp.Tests/OrderApp.Tests.csproj
 ```
 
 Run specific test class:
